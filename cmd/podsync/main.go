@@ -112,6 +112,7 @@ func main() {
 		log.WithError(err).Fatal("failed to open storage")
 	}
 
+	
 	// Run updater thread
 	log.Debug("creating updater")
 	updater, err := NewUpdater(cfg, downloader, database, storage)
@@ -136,11 +137,14 @@ func main() {
 					log.WithError(err).Errorf("failed to update feed: %s", feed.URL)
 				} else {
 					log.Infof("next update of %s: %s", feed.ID, c.Entry(m[feed.ID]).Next)
+					
 				}
 			case <-ctx.Done():
 				return ctx.Err()
 			}
 		}
+		log.Info("Performing media server update")
+		updater.Updatemediaserver(ctx,cfg.Mediaserver)
 	})
 
 	// Run cron scheduler

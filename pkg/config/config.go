@@ -85,6 +85,15 @@ type Server struct {
 	DataDir string `toml:"data_dir"`
 }
 
+type MediaServer struct {
+	// Plex Server url
+	Url string `toml:"url"`
+	// Plex-X-Token - insert url for ref
+	PlexToken string `toml:"token"`
+	// Plex library ID
+	PlexLibrary int `toml:"library"`
+}
+
 type Database struct {
 	// Dir is a directory to keep database files
 	Dir    string  `toml:"dir"`
@@ -131,6 +140,8 @@ type Config struct {
 	Log Log `toml:"log"`
 	// Database configuration
 	Database Database `toml:"database"`
+	//Media Server details (plex)
+	MediaServer MediaServer `toml:"mediaserver"`
 	// Feeds is a list of feeds to host by this app.
 	// ID will be used as feed ID in http://podsync.net/{FEED_ID}.xml
 	Feeds map[string]*Feed
