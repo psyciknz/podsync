@@ -120,7 +120,7 @@ func main() {
 	
 	// Run updater thread
 	log.Debug("creating updater")
-	updater, err := NewUpdater(cfg, downloader, database, storage)
+	updater, err := NewUpdater(cfg, downloader, database, storage, mediaserver)
 	if err != nil {
 		log.WithError(err).Fatal("failed to create updater")
 	}
