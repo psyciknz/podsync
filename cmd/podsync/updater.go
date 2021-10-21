@@ -413,8 +413,11 @@ func (u *Updater) cleanup(ctx context.Context, feedConfig *config.Feed) error {
 }
 
 func (u *Updater) Updatemediaserver(ctx context.Context) error {
-	var refresh =  fmt.Sprintf("%s/refresh?X-Plex-Token=%s", u.plexurl,u.plextoken)
-	var emptytrash =  fmt.Sprintf("%s/emptyTrash?X-Plex-Token=%s", u.plexurl,u.plextoken)
+	var (
+		refresh =  fmt.Sprintf("%s/refresh?X-Plex-Token=%s", u.plexurl,u.plextoken)
+		emptytrash =  fmt.Sprintf("%s/emptyTrash?X-Plex-Token=%s", u.plexurl,u.plextoken)
+		result *multierror.Error
+	)
 
 	log.Debug("Updating media server")
 	//curl -v http://<server>:32400/library/sections/<library>/refresh?X-Plex-Token=<token>
