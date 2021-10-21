@@ -22,6 +22,7 @@ import (
 	"github.com/mxpv/podsync/pkg/fs"
 	"github.com/mxpv/podsync/pkg/model"
 	"github.com/mxpv/podsync/pkg/ytdl"
+	"github.com/psyciknz/podsync/pkg/media"
 )
 
 type Downloader interface {

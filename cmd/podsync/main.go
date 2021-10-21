@@ -18,6 +18,7 @@ import (
 	"github.com/mxpv/podsync/pkg/db"
 	"github.com/mxpv/podsync/pkg/fs"
 	"github.com/mxpv/podsync/pkg/ytdl"
+	"github.com/psyciknz/podsync/pkg/media"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
