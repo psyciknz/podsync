@@ -17,12 +17,18 @@ const (
 	UpdatePeriod           = 24 * time.Hour
 )
 
+type Plex struct {
+	url       	string
+	plextoken	string
+	library		int
+}
+
 var (
 	ErrTooManyRequests = errors.New(http.StatusText(http.StatusTooManyRequests))
 )
 
 
-func New(ctx context.Context, cfg config.MediaServer)  {
+func New(ctx context.Context, cfg config.MediaServer) (*Plex, error)  {
 	
 	log.Debugf("creating new plex server")
 
@@ -30,6 +36,11 @@ func New(ctx context.Context, cfg config.MediaServer)  {
 	plextoken = cfg.PlexToken
 	library = cfg.PlexLibrary
 	
+	plex := &Plex{
+		url:    url,
+		plextoken: plextoken,
+		library:	library,
+	}
 
 	return plex, nil
 }
