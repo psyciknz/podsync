@@ -143,8 +143,6 @@ func main() {
 				return ctx.Err()
 			}
 		}
-		log.Info("Performing media server update")
-		updater.Updatemediaserver(ctx,cfg.Mediaserver)
 	})
 
 	// Run cron scheduler

@@ -1,0 +1,25 @@
+FROM golang:alpine3.14 as build
+
+WORKDIR /app/
+COPY go.mod ./
+COPY go.sum ./
+
+RUN go mod download
+
+#COPY ./ ./
+COPY ./ ./
+RUN go build  ./cmd/podsync 
+RUN ls 
+
+FROM alpine:3.14
+RUN wget -O /usr/bin/youtube-dl https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp && \
+    chmod +x /usr/bin/youtube-dl && \
+    apk --no-cache add ca-certificates python3 ffmpeg tzdata
+RUN mkdir app
+WORKDIR /app
+RUN ls 
+COPY --from=build /app/podsync podsync
+
+ #
+ENTRYPOINT ["/app/podsync"]
+CMD ["--no-banner"]
