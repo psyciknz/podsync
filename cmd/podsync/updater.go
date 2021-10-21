@@ -28,15 +28,20 @@ type Downloader interface {
 	Download(ctx context.Context, feedConfig *config.Feed, episode *model.Episode) (io.ReadCloser, error)
 }
 
-type Updater struct {
-	config     *config.Config
-	downloader Downloader
-	db         db.Storage
-	fs         fs.Storage
-	keys       map[model.Provider]feed.KeyProvider
+type MediaServer interface {
+	MediaServer(ctx context.Context, url *config.Url, token *config.PlexToken, library *config.PlexLibrary) (io.ReadCloser, error)
 }
 
-func NewUpdater(config *config.Config, downloader Downloader, db db.Storage, fs fs.Storage) (*Updater, error) {
+type Updater struct {
+	config     	*config.Config
+	downloader 	Downloader
+	db         	db.Storage
+	fs         	fs.Storage
+	mediaserver	MediaServer
+	keys       	map[model.Provider]feed.KeyProvider
+}
+
+func NewUpdater(config *config.Config, downloader Downloader, db db.Storage, fs fs.Storage, mediaserver MediaServer) (*Updater, error) {
 	keys := map[model.Provider]feed.KeyProvider{}
 
 	for name, list := range config.Tokens {
@@ -48,11 +53,12 @@ func NewUpdater(config *config.Config, downloader Downloader, db db.Storage, fs 
 	}
 
 	return &Updater{
-		config:     config,
-		downloader: downloader,
-		db:         db,
-		fs:         fs,
-		keys:       keys,
+		config:     	config,
+		downloader: 	downloader,
+		db:         	db,
+		fs:         	fs,
+		mediaserver: 	mediaserver,
+		keys:       	keys,
 	}, nil
 }
 
@@ -408,29 +414,10 @@ func (u *Updater) cleanup(ctx context.Context, feedConfig *config.Feed) error {
 	return result.ErrorOrNil()
 }
 
-func (u *Updater) Updatemediaserver(ctx context.Context, server *config.MediaServer) error {
-	var (
-		url = server.Url
-		token = server.PlexToken
-		library = server.PlexLibrary
-		refresh =  fmt.Sprintf("%s/library/sections/%d/refresh?X-Plex-Token=%s", url,library,token)
-		emptytrash =  fmt.Sprintf("%s/library/sections/%d/emptyTrash?X-Plex-Token=%s", url,library,token)
-	)
+func (u *Updater) Updatemediaserver(ctx context.Context) error {
+	u.mediaserver.Updatemediaserver(ctx)
 
-	log.Debug("Updating media server")
-	//curl -v http://<server>:32400/library/sections/<library>/refresh?X-Plex-Token=<token>
-	//curl -X PUT "http://<server>:32400/library/sections/<library>/emptyTrash?X-Plex-Token=<token>"
-	
-	resp, err := http.Get(refresh)
-	if err != nil {
-   		log.Fatalln(err)
-	}
-	log.Info(fmt.Sprintf("Updated library %d: result: %s", library,resp.Status))
-	resp2, err2 := http.Get(emptytrash)
-	if err2 != nil {
-		log.Fatalln(err2)
- 	}
-	log.Info(fmt.Sprintf("Emptied Trash %d result: %s", library,resp2.Status))
-	
-	return nil
+	return result.ErrorOrNil()
 }
+
+

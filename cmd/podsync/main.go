@@ -102,6 +102,11 @@ func main() {
 		log.WithError(err).Fatal("youtube-dl error")
 	}
 
+	mediaserver, err := plex.New(ctx, cfg.MediaServer)
+	if err != nil {
+		log.WithError(err).Fatal("plex error")
+	}
+
 	database, err := db.NewBadger(&cfg.Database)
 	if err != nil {
 		log.WithError(err).Fatal("failed to open database")
@@ -141,7 +146,7 @@ func main() {
 				}
 			case <-ctx.Done():
 				//add media server  call here
-				updater.Updatemediaserver(ctx, cfg.MediaServer)
+				updater.Updatemediaserver(ctx)
 				return ctx.Err()
 			}
 		}
