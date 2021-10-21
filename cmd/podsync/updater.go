@@ -273,7 +273,7 @@ func (u *Updater) downloadEpisodes(ctx context.Context, feedConfig *config.Feed)
 		// We download the episode to a temp directory first to avoid downloading this file by clients
 		// while still being processed by youtube-dl (e.g. a file is being downloaded from YT or encoding in progress)
 
-		logger.Infof("! downloading episode %s", episode.VideoURL)
+		logger.Infof("! (Feed:%s) downloading episode %s", feedID, episode.VideoURL)
 		tempFile, err := u.downloader.Download(ctx, feedConfig, episode)
 		if err != nil {
 			// YouTube might block host with HTTP Error 429: Too Many Requests
