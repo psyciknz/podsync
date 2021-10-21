@@ -115,7 +115,7 @@ func main() {
 	
 	// Run updater thread
 	log.Debug("creating updater")
-	url = fmt.Sprintf("%s/library/sections/%d",cfg.MediaServer.Url,cfg.MediaServer.PlexLibrary)
+	var url = fmt.Sprintf("%s/library/sections/%d",cfg.MediaServer.Url,cfg.MediaServer.PlexLibrary)
 	//refresh =  fmt.Sprintf("%s/library/sections/%d/refresh?X-Plex-Token=%s", url,library,plextoken)
 	//emptytrash =  fmt.Sprintf("%s/library/sections/%d/emptyTrash?X-Plex-Token=%s", url,library,plextoken)
 	updater, err := NewUpdater(cfg, downloader, database, storage, url,cfg.MediaServer.PlexToken)
