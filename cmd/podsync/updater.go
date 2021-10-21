@@ -22,15 +22,10 @@ import (
 	"github.com/mxpv/podsync/pkg/fs"
 	"github.com/mxpv/podsync/pkg/model"
 	"github.com/mxpv/podsync/pkg/ytdl"
-	"github.com/mxpv/podsync/pkg/media"
 )
 
 type Downloader interface {
 	Download(ctx context.Context, feedConfig *config.Feed, episode *model.Episode) (io.ReadCloser, error)
-}
-
-type MediaServer interface {
-	MediaServer(ctx context.Context, url *config.Url, token *config.PlexToken, library *config.PlexLibrary) (io.ReadCloser, error)
 }
 
 type Updater struct {
@@ -38,11 +33,12 @@ type Updater struct {
 	downloader 	Downloader
 	db         	db.Storage
 	fs         	fs.Storage
-	mediaserver	MediaServer
+	plexurl		string
+	plextoken	string
 	keys       	map[model.Provider]feed.KeyProvider
 }
 
-func NewUpdater(config *config.Config, downloader Downloader, db db.Storage, fs fs.Storage, mediaserver MediaServer) (*Updater, error) {
+func NewUpdater(config *config.Config, downloader Downloader, db db.Storage, fs fs.Storage, plexurl string, plextoken string) (*Updater, error) {
 	keys := map[model.Provider]feed.KeyProvider{}
 
 	for name, list := range config.Tokens {
@@ -58,7 +54,8 @@ func NewUpdater(config *config.Config, downloader Downloader, db db.Storage, fs 
 		downloader: 	downloader,
 		db:         	db,
 		fs:         	fs,
-		mediaserver: 	mediaserver,
+		plexurl: 		plexurl,
+		plextoken:		plextoken,
 		keys:       	keys,
 	}, nil
 }
@@ -416,7 +413,23 @@ func (u *Updater) cleanup(ctx context.Context, feedConfig *config.Feed) error {
 }
 
 func (u *Updater) Updatemediaserver(ctx context.Context) error {
-	u.mediaserver.Updatemediaserver(ctx)
+	refresh =  fmt.Sprintf("%s/refresh?X-Plex-Token=%s", u.plexurl,u.plextoken)
+	emptytrash =  fmt.Sprintf("%s/emptyTrash?X-Plex-Token=%s", u.plexurl,u.plextoken)
+
+	log.Debug("Updating media server")
+	//curl -v http://<server>:32400/library/sections/<library>/refresh?X-Plex-Token=<token>
+	//curl -X PUT "http://<server>:32400/library/sections/<library>/emptyTrash?X-Plex-Token=<token>"
+	
+	resp, err := http.Get(refresh)
+	if err != nil {
+   		log.Fatalln(err)
+	}
+	log.Info(fmt.Sprintf("Updated library %d: result: %s", library,resp.Status))
+	resp2, err2 := http.Get(emptytrash)
+	if err2 != nil {
+		log.Fatalln(err2)
+ 	}
+	log.Info(fmt.Sprintf("Emptied Trash %d result: %s", library,resp2.Status))
 
 	return result.ErrorOrNil()
 }

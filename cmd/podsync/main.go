@@ -18,7 +18,6 @@ import (
 	"github.com/mxpv/podsync/pkg/db"
 	"github.com/mxpv/podsync/pkg/fs"
 	"github.com/mxpv/podsync/pkg/ytdl"
-	"github.com/mxpv/podsync/pkg/media"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -103,11 +102,6 @@ func main() {
 		log.WithError(err).Fatal("youtube-dl error")
 	}
 
-	mediaserver, err := plex.New(ctx, cfg.MediaServer)
-	if err != nil {
-		log.WithError(err).Fatal("plex error")
-	}
-
 	database, err := db.NewBadger(&cfg.Database)
 	if err != nil {
 		log.WithError(err).Fatal("failed to open database")
@@ -121,7 +115,10 @@ func main() {
 	
 	// Run updater thread
 	log.Debug("creating updater")
-	updater, err := NewUpdater(cfg, downloader, database, storage, mediaserver)
+	url = fmt.Sprintf("%s/library/sections/%d",cfg.MediaServer.Url,cfg.MediaServer.PlexLibrary)
+	//refresh =  fmt.Sprintf("%s/library/sections/%d/refresh?X-Plex-Token=%s", url,library,plextoken)
+	//emptytrash =  fmt.Sprintf("%s/library/sections/%d/emptyTrash?X-Plex-Token=%s", url,library,plextoken)
+	updater, err := NewUpdater(cfg, downloader, database, storage, url,cfg.MediaServer.PlexToken)
 	if err != nil {
 		log.WithError(err).Fatal("failed to create updater")
 	}
