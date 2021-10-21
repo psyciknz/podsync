@@ -190,10 +190,6 @@ func (c *Config) validate() error {
 		}
 	}
 
-	if c.MediaServer.Url == "" {
-		result = "https://localhost:32400"
-	}
-
 	if len(c.Feeds) == 0 {
 		result = multierror.Append(result, errors.New("at least one feed must be specified"))
 	}
@@ -231,6 +227,11 @@ func (c *Config) applyDefaults(configPath string) {
 	if c.Database.Dir == "" {
 		c.Database.Dir = filepath.Join(filepath.Dir(configPath), "db")
 	}
+
+	if c.MediaServer.Url == "" {
+		c.MediaServer.Url = "https://localhost:32400"
+	}
+
 
 	for _, feed := range c.Feeds {
 		if feed.UpdatePeriod.Duration == 0 {
