@@ -3,21 +3,13 @@ package media
 import (
 	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/mxpv/podsync/pkg/config"
-	"github.com/mxpv/podsync/pkg/model"
 )
 
 const (
@@ -30,7 +22,7 @@ var (
 )
 
 
-func New(ctx context.Context, cfg config.MediaServer) (*Media, error) {
+func New(ctx context.Context, cfg config.MediaServer)  {
 	
 	log.Debugf("creating new plex server")
 
