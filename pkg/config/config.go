@@ -190,6 +190,10 @@ func (c *Config) validate() error {
 		}
 	}
 
+	if c.MediaServer.Url == "" {
+		result = "https://localhost:32400"
+	}
+
 	if len(c.Feeds) == 0 {
 		result = multierror.Append(result, errors.New("at least one feed must be specified"))
 	}

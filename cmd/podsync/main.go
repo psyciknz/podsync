@@ -141,7 +141,7 @@ func main() {
 				}
 			case <-ctx.Done():
 				//add media server  call here
-				
+				updater.Updatemediaserver(ctx, cfg.MediaServer)
 				return ctx.Err()
 			}
 		}
