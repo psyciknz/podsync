@@ -424,12 +424,12 @@ func (u *Updater) Updatemediaserver(ctx context.Context) error {
 	if err != nil {
    		log.Fatalln(err)
 	}
-	log.Info(fmt.Sprintf("Updated library %d: result: %s", library,resp.Status))
+	log.Info(fmt.Sprintf("Updated library %s: result: %s", refresh,resp.Status))
 	resp2, err2 := http.Get(emptytrash)
 	if err2 != nil {
 		log.Fatalln(err2)
  	}
-	log.Info(fmt.Sprintf("Emptied Trash %d result: %s", library,resp2.Status))
+	log.Info(fmt.Sprintf("Emptied Trash %s result: %s", refresh,resp2.Status))
 
 	return result.ErrorOrNil()
 }
