@@ -140,9 +140,12 @@ func main() {
 					
 				}
 			case <-ctx.Done():
+				//add media server  call here
+				
 				return ctx.Err()
 			}
 		}
+		
 	})
 
 	// Run cron scheduler
