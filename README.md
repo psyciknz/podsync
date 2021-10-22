@@ -31,6 +31,7 @@ any device in podcast client.
 - Supports ARM.
 - Automatic youtube-dl self update.
 - Supports API keys rotation.
+- Can update a plex server if you have a library set up to receive the content from podsync.
 
 ## Dependencies
 
@@ -70,6 +71,11 @@ vimeo = [ # Multiple keys will be rotated.
   "VIMEO_API_KEY_1", # Vimeo developer keys. See https://developer.vimeo.com/api/guides/start#generate-access-token
   "VIMEO_API_KEY_2"
 ]
+
+[mediaserver]
+url = "http://<plex server address>:<port> (assume 32400)"
+token = "<plex token here>" #See https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
+library = <library section ID> #Similar process to x-plex-token, but in the xml that is showing look for librarySectionID=xx
 
 [feeds]
   [feeds.ID1]
@@ -190,4 +196,10 @@ $ docker-compose up
 ## How to make a release
 
 Just push a git tag. CI will do the rest.
+
+or 
+Clone to a local machine and run
+```
+docker build -f Dockerfile-withbuild -t <tag> .
+```
 
