@@ -89,7 +89,7 @@ func (u *Updater) Update(ctx context.Context, feedConfig *config.Feed) error {
 		log.WithError(err).Error("cleanup failed")
 	}
 
-	if err: = u.Updatemediaserver(ctx); err != nil {
+	if err := u.Updatemediaserver(ctx); err != nil {
 		log.WithError(err).Error("plex update failed")
 	}
 
