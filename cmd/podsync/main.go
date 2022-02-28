@@ -10,16 +10,16 @@ import (
 	"time"
 
 	"github.com/jessevdk/go-flags"
+	"github.com/mxpv/podsync/pkg/feed"
+	"github.com/mxpv/podsync/pkg/server"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
+	"gopkg.in/natefinch/lumberjack.v2"
 
-	"github.com/mxpv/podsync/pkg/config"
 	"github.com/mxpv/podsync/pkg/db"
 	"github.com/mxpv/podsync/pkg/fs"
 	"github.com/mxpv/podsync/pkg/ytdl"
-
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type Opts struct {
@@ -76,12 +76,14 @@ func main() {
 
 	// Load TOML file
 	log.Debugf("loading configuration %q", opts.ConfigPath)
-	cfg, err := config.LoadConfig(opts.ConfigPath)
+	cfg, err := LoadConfig(opts.ConfigPath)
 	if err != nil {
 		log.WithError(err).Fatal("failed to load configuration file")
 	}
 
 	if cfg.Log.Filename != "" {
+		log.Infof("Using log file: %s", cfg.Log.Filename)
+
 		log.SetOutput(&lumberjack.Logger{
 			Filename:   cfg.Log.Filename,
 			MaxSize:    cfg.Log.MaxSize,
@@ -107,7 +109,7 @@ func main() {
 		log.WithError(err).Fatal("failed to open database")
 	}
 
-	storage, err := fs.NewLocal(cfg.Server.DataDir, cfg.Server.Hostname)
+	storage, err := fs.NewLocal(cfg.Server.DataDir)
 	if err != nil {
 		log.WithError(err).Fatal("failed to open storage")
 	}
@@ -124,7 +126,7 @@ func main() {
 	}
 
 	// Queue of feeds to update
-	updates := make(chan *config.Feed, 16)
+	updates := make(chan *feed.Config, 16)
 	defer close(updates)
 
 	// Create Cron
@@ -185,7 +187,7 @@ func main() {
 	})
 
 	// Run web server
-	srv := NewServer(cfg)
+	srv := server.New(cfg.Server, storage)
 
 	group.Go(func() error {
 		log.Infof("running listener at %s", srv.Addr)
@@ -195,8 +197,12 @@ func main() {
 	group.Go(func() error {
 		// Shutdown web server
 		defer func() {
+			ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer func() {
+				cancel()
+			}()
 			log.Info("shutting down web server")
-			if err := srv.Shutdown(ctx); err != nil {
+			if err := srv.Shutdown(ctxShutDown); err != nil {
 				log.WithError(err).Error("server shutdown failed")
 			}
 		}()

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	itunes "github.com/eduncan911/podcast"
 	"github.com/pkg/errors"
 
-	"github.com/mxpv/podsync/pkg/config"
 	"github.com/mxpv/podsync/pkg/model"
 )
 
@@ -30,7 +30,7 @@ func (p timeSlice) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
-func Build(ctx context.Context, feed *model.Feed, cfg *config.Feed, provider urlProvider) (*itunes.Podcast, error) {
+func Build(_ctx context.Context, feed *model.Feed, cfg *Config, hostname string) (*itunes.Podcast, error) {
 	const (
 		podsyncGenerator = "Podsync generator (support us at https://github.com/mxpv/podsync)"
 		defaultCategory  = "TV & Film"
@@ -125,11 +125,10 @@ func Build(ctx context.Context, feed *model.Feed, cfg *config.Feed, provider url
 			enclosureType = itunes.MP3
 		}
 
-		episodeName := EpisodeName(cfg, episode)
-		downloadURL, err := provider.URL(ctx, cfg.ID, episodeName)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to obtain download URL for: %s", episodeName)
-		}
+		var (
+			episodeName = EpisodeName(cfg, episode)
+			downloadURL = fmt.Sprintf("%s/%s/%s", strings.TrimRight(hostname, "/"), cfg.ID, episodeName)
+		)
 
 		item.AddEnclosure(downloadURL, enclosureType, episode.Size)
 
@@ -152,7 +151,7 @@ func Build(ctx context.Context, feed *model.Feed, cfg *config.Feed, provider url
 	return &p, nil
 }
 
-func EpisodeName(feedConfig *config.Feed, episode *model.Episode) string {
+func EpisodeName(feedConfig *Config, episode *model.Episode) string {
 	ext := "mp4"
 	if feedConfig.Format == model.FormatAudio {
 		ext = "mp3"
