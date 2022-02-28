@@ -1,14 +1,14 @@
 package builder
 
 import (
+	"context"
 	"strconv"
 	"time"
 
+	"github.com/mxpv/podsync/pkg/feed"
 	"github.com/pkg/errors"
 	soundcloudapi "github.com/zackradisic/soundcloud-api"
-	"golang.org/x/net/context"
 
-	"github.com/mxpv/podsync/pkg/config"
 	"github.com/mxpv/podsync/pkg/model"
 )
 
@@ -16,7 +16,7 @@ type SoundCloudBuilder struct {
 	client *soundcloudapi.API
 }
 
-func (s *SoundCloudBuilder) Build(ctx context.Context, cfg *config.Feed) (*model.Feed, error) {
+func (s *SoundCloudBuilder) Build(_ctx context.Context, cfg *feed.Config) (*model.Feed, error) {
 	info, err := ParseURL(cfg.URL)
 	if err != nil {
 		return nil, err

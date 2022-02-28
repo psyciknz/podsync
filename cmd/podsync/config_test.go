@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"io/ioutil"
@@ -10,16 +10,14 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/mxpv/podsync/pkg/model"
+	"github.com/mxpv/podsync/pkg/server"
 )
 
 func TestLoadConfig(t *testing.T) {
 	const file = `
 [tokens]
 youtube = "123"
-vimeo = [
-  "321",
-  "456"
-]
+vimeo = ["321", "456"]
 
 [server]
 port = 80
@@ -40,17 +38,18 @@ timeout = 15
   format = "audio"
   quality = "low"
   filters = { title = "regex for title here" }
+  playlist_sort = "desc"
   clean = { keep_last = 10 }
-  	[feeds.XYZ.custom]
-	cover_art = "http://img"
-	cover_art_quality = "high"
-	category = "TV"
-	subcategories = ["1", "2"]
-	explicit = true
-	lang = "en"
-	author = "Mrs. Smith (mrs@smith.org)"
-	ownerName = "Mrs. Smith"
-	ownerEmail = "mrs@smith.org"
+  [feeds.XYZ.custom]
+  cover_art = "http://img"
+  cover_art_quality = "high"
+  category = "TV"
+  subcategories = ["1", "2"]
+  explicit = true
+  lang = "en"
+  author = "Mrs. Smith (mrs@smith.org)"
+  ownerName = "Mrs. Smith"
+  ownerEmail = "mrs@smith.org"
 `
 	path := setup(t, file)
 	defer os.Remove(path)
@@ -75,11 +74,12 @@ timeout = 15
 	assert.True(t, ok)
 	assert.Equal(t, "https://youtube.com/watch?v=ygIUF678y40", feed.URL)
 	assert.EqualValues(t, 48, feed.PageSize)
-	assert.EqualValues(t, Duration{5 * time.Hour}, feed.UpdatePeriod)
+	assert.EqualValues(t, 5*time.Hour, feed.UpdatePeriod)
 	assert.EqualValues(t, "audio", feed.Format)
 	assert.EqualValues(t, "low", feed.Quality)
 	assert.EqualValues(t, "regex for title here", feed.Filters.Title)
 	assert.EqualValues(t, 10, feed.Clean.KeepLast)
+	assert.EqualValues(t, model.SortingDesc, feed.PlaylistSort)
 
 	assert.EqualValues(t, "http://img", feed.Custom.CoverArt)
 	assert.EqualValues(t, "high", feed.Custom.CoverArtQuality)
@@ -140,7 +140,7 @@ data_dir = "/data"
 	feed, ok := config.Feeds["A"]
 	require.True(t, ok)
 
-	assert.EqualValues(t, feed.UpdatePeriod, Duration{model.DefaultUpdatePeriod})
+	assert.EqualValues(t, feed.UpdatePeriod, model.DefaultUpdatePeriod)
 	assert.EqualValues(t, feed.PageSize, 50)
 	assert.EqualValues(t, feed.Quality, "high")
 	assert.EqualValues(t, feed.Custom.CoverArtQuality, "high")
@@ -174,7 +174,7 @@ data_dir = "/data"
 
 func TestDefaultHostname(t *testing.T) {
 	cfg := Config{
-		Server: Server{},
+		Server: server.Config{},
 	}
 
 	t.Run("empty hostname", func(t *testing.T) {
